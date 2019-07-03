@@ -54,6 +54,20 @@ pub fn get_file_existence_checker() -> fn(file_path: &str) -> Result<bool, ()> {
     |file_path: &str| Ok(Path::new(file_path).exists())
 }
 
+pub fn get_file_reader() -> fn(file_path: &str) -> Result<String, ()> {
+    |file_path: &str| {
+        let mut file = match File::open(&Path::new(file_path)) {
+            Err(_) => return Err(()),
+            Ok(file) => file,
+        };
+        let mut contents = String::new();
+        match file.read_to_string(&mut contents) {
+            Err(_) => Err(()),
+            Ok(_) => Ok(contents),
+        }
+    }
+}
+
 #[cfg(test)]
 #[path = "file_io_test.rs"]
 mod file_io_tests;

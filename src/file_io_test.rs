@@ -23,7 +23,21 @@ mod get_file_existence_checker_tests {
         fn validate(_exists: fn(&str) -> Result<bool, ()>) -> bool {
             true
         };
-        let writer = get_file_existence_checker();
-        assert!(validate(writer));
+        let file_exists = get_file_existence_checker();
+        assert!(validate(file_exists));
+    }
+}
+
+#[cfg(test)]
+mod get_file_reader_tests {
+    use super::*;
+
+    #[test]
+    fn returns_correct_closure() {
+        fn validate(_read: fn(&str) -> Result<String, ()>) -> bool {
+            true
+        };
+        let read_file = get_file_reader();
+        assert!(validate(read_file));
     }
 }
