@@ -9,3 +9,6 @@ readme = "README.md"
 edition = "2018"
 
 [dependencies]
+
+[dev-dependencies]
+rusty-hook = "0.9.1"
