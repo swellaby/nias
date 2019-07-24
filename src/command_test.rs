@@ -19,16 +19,8 @@ mod handle_command_output_tests {
     use super::*;
     use std::io::{Error, ErrorKind};
     use std::process::{ExitStatus, Output};
-
-    #[test]
-    #[should_panic(
-        expected = "Command runner crashed in unrecoverable manner. Details: crashed hard"
-    )]
-    fn should_panic_on_command_error() {
-        let error_details = "crashed hard";
-        let error = Error::new(ErrorKind::Other, error_details);
-        let _ = handle_command_output(Err(error));
-    }
+    const RAW_STDOUT_OUTPUT: &str = "hello\nworld!\n\n";
+    const EXP_OUTPUT: &str = "hello\nworld!";
 
     #[cfg(target_family = "windows")]
     fn get_exit_status(raw: u32) -> ExitStatus {
@@ -43,18 +35,38 @@ mod handle_command_output_tests {
     }
 
     #[test]
+    #[should_panic(
+        expected = "Command runner crashed in unrecoverable manner. Details: crashed hard"
+    )]
+    fn should_panic_on_command_error() {
+        let error_details = "crashed hard";
+        let error = Error::new(ErrorKind::Other, error_details);
+        let _ = handle_command_output(Err(error));
+    }
+
+    #[test]
     fn should_return_ok_with_stdout_on_command_success() {
-        let original = "hello\nworld!\n\n";
-        let exp = "hello\nworld!";
-        let stdout_result = String::from(original);
-        let stdout = stdout_result.as_bytes();
-        let raw = 0;
         let output = Output {
-            status: get_exit_status(raw),
-            stdout: Vec::from(stdout),
+            status: get_exit_status(0),
+            stdout: Vec::from(RAW_STDOUT_OUTPUT.as_bytes()),
             stderr: Vec::new(),
         };
         let result = handle_command_output(Ok(output));
-        assert_eq!(&result.unwrap(), exp);
+        assert_eq!(&result.unwrap(), EXP_OUTPUT);
+    }
+
+    #[test]
+    fn should_return_error_with_stdout_and_stderr_on_command_failure() {
+        let std_error = "utter failure\n";
+        let output = Output {
+            status: get_exit_status(3),
+            stdout: Vec::from(RAW_STDOUT_OUTPUT.as_bytes()),
+            stderr: Vec::from(std_error.as_bytes()),
+        };
+        let result = handle_command_output(Ok(output));
+        assert_eq!(
+            result.unwrap_err(),
+            format!("{}\n{}", std_error, RAW_STDOUT_OUTPUT,)
+        );
     }
 }
