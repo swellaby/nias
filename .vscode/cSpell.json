@@ -3,11 +3,17 @@
   "language": "en",
   "words": [
     "clippy",
+    "cobertura",
+    "codecov",
+    "junit",
+    "kcov",
     "nias",
     "pipefail",
     "rustfmt",
     "rustup",
-    "swellaby"
+    "swellaby",
+    "testresults",
+    "userprofile"
   ],
   "flagWords": [
 
