@@ -16,11 +16,11 @@ steps:
   displayName: 'Install Rust'
 
 - task: DownloadPipelineArtifact@0
-  displayName: 'Download cargo-junit executable'
   inputs:
     pipelineId: 1448
     artifactName: 'cargo-junit'
     targetPath: '$(cargoBinPath)'
+  displayName: 'Download cargo-junit executable'
 
 - script: |
     # This is basically a `cargo fetch` + compile, but includes dev deps as well.
@@ -31,9 +31,9 @@ steps:
   displayName: 'Run tests'
 
 - task: PublishTestResults@2
-  displayName: 'Publish unit test results'
   inputs:
     testResultsFormat: JUnit
     testResultsFiles: 'junit.xml'
     searchFolder: $(Build.SourcesDirectory)/.testresults/unit
     testRunTitle: 'nias::Unit Tests::Windows PR - Build $(Build.BuildId)'
+  displayName: 'Publish unit test results'

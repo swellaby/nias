@@ -63,9 +63,9 @@ steps:
 #   displayName: 'Publish coverage results'
 
 - task: PublishTestResults@2
-  displayName: 'publish unit test results'
   inputs:
     testResultsFormat: JUnit
     testResultsFiles: 'junit.xml'
     searchFolder: $(Build.SourcesDirectory)/.testresults/unit
     testRunTitle: 'nias::Unit Tests::Linux PR - Build $(Build.BuildId)'
+  displayName: 'publish unit test results'
