@@ -2,7 +2,10 @@
   "version": "0.1",
   "language": "en",
   "words": [
+    "clippy",
     "nias",
+    "rustfmt",
+    "rustup",
     "swellaby"
   ],
   "flagWords": [
