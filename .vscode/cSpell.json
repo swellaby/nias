@@ -2,8 +2,18 @@
   "version": "0.1",
   "language": "en",
   "words": [
+    "clippy",
+    "cobertura",
+    "codecov",
+    "junit",
+    "kcov",
     "nias",
-    "swellaby"
+    "pipefail",
+    "rustfmt",
+    "rustup",
+    "swellaby",
+    "testresults",
+    "userprofile"
   ],
   "flagWords": [
 

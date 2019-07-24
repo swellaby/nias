@@ -1,0 +1,43 @@
+trigger:
+- master
+
+pr:
+- master
+
+pool:
+  vmImage: macos-10.14
+
+steps:
+- script: |
+    curl https://sh.rustup.rs -sSf | sh -s -- -y
+    echo "##vso[task.setvariable variable=PATH;]$PATH:$HOME/.cargo/bin"
+    echo "##vso[task.setvariable variable=cargoBinPath;]$HOME/.cargo/bin"
+  displayName: 'Install Rust'
+
+- task: DownloadPipelineArtifact@0
+  inputs:
+    pipelineId: 1447
+    artifactName: 'cargo-junit'
+    targetPath: '$(cargoBinPath)'
+  displayName: 'Download cargo-junit executable'
+
+- script: |
+    sudo chmod +rwx $(cargoBinPath)/cargo-junit
+    mkdir -p .testresults/unit
+  displayName: 'Prep test tools'
+
+- script: |
+    set -eo pipefail
+    # This is basically a `cargo fetch` + compile, but includes dev deps as well.
+    # `cargo junit` will crash on Mac if the output includes fetch/compile info, hence running this first.
+    cargo test --no-run
+    cargo junit --name .testresults/unit/junit.xml
+  displayName: 'Run tests'
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: JUnit
+    testResultsFiles: 'junit.xml'
+    searchFolder: $(Build.SourcesDirectory)/.testresults/unit
+    testRunTitle: 'nias::Unit Tests::Mac PR - Build $(Build.BuildId)'
+  displayName: 'Publish unit test results'
