@@ -52,10 +52,7 @@ pub fn get_file_writer(
 
 pub fn get_file_existence_checker() -> fn(file_path: &str) -> Result<bool, ()> {
     |file_path: &str| Ok(Path::new(file_path).exists())
-
-
-
-    }
+}
 
 pub fn get_file_reader() -> fn(file_path: &str) -> Result<String, ()> {
     |file_path: &str| {
