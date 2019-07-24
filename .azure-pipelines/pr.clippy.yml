@@ -21,6 +21,3 @@ steps:
     cargo clippy
   displayName: 'Run clippy'
 
-# - bash: cargo clippy
-#   failOnStderr: 'true'
-#   displayName: 'Run clippy'

@@ -4,6 +4,7 @@
   "words": [
     "clippy",
     "nias",
+    "pipefail",
     "rustfmt",
     "rustup",
     "swellaby"
