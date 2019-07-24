@@ -22,9 +22,10 @@ steps:
     targetPath: '$(cargoBinPath)'
   displayName: 'Download cargo-junit executable'
 
+# This is basically a `cargo fetch` + compile, but includes dev deps as well.
+# `cargo junit` will crash on Windows if the output includes fetch/compile info,
+# hence running `cargo test` first.
 - script: |
-    # This is basically a `cargo fetch` + compile, but includes dev deps as well.
-    # `cargo junit` will crash on Windows if the output includes fetch/compile info, hence running this first.
     cargo test --no-run
     mkdir $(Build.SourcesDirectory)\.testresults\unit
     cargo junit --name $(Build.SourcesDirectory)\.testresults\unit\junit.xml
