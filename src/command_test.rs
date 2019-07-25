@@ -56,7 +56,7 @@ mod handle_command_output_tests {
     }
 
     #[test]
-    fn should_return_error_with_stdout_and_stderr_on_command_failure() {
+    fn should_return_err_with_stdout_stderr_mix_on_command_failure() {
         let std_error = "utter failure\n";
         let output = Output {
             status: get_exit_status(3),
