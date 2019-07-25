@@ -45,6 +45,7 @@ mod get_conditional_logger_tests {
             true
         };
         let logger = get_conditional_logger();
+        logger("", false);
         assert!(validate(logger));
     }
 }
