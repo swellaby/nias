@@ -41,3 +41,17 @@ mod get_file_reader_tests {
         assert!(validate(read_file));
     }
 }
+
+#[cfg(test)]
+mod get_file_remover_tests {
+    use super::*;
+
+    #[test]
+    fn returns_correct_closure() {
+        fn validate(_remove_file: fn(&str) -> Result<(), String>) -> bool {
+            true
+        };
+        let remover = get_file_remover();
+        assert!(validate(remover));
+    }
+}
