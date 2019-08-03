@@ -1,4 +1,4 @@
-use std::fs::File;
+use std::fs::{remove_file, File};
 use std::io::prelude::*;
 #[cfg(target_family = "unix")]
 use std::os::unix::fs::PermissionsExt;
@@ -65,6 +65,16 @@ pub fn get_file_reader() -> fn(file_path: &str) -> Result<String, ()> {
             Err(_) => Err(()),
             Ok(_) => Ok(contents),
         }
+    }
+}
+
+pub fn get_file_remover() -> fn(file_path: &str) -> Result<(), String> {
+    |file_path: &str| match remove_file(file_path) {
+        Ok(_) => Ok(()),
+        Err(msg) => Err(format!(
+            "Failed to remove file: {}. Error details: {}",
+            file_path, msg
+        )),
     }
 }
 
