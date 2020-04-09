@@ -1,4 +1,20 @@
 use super::*;
+use std::process::ExitStatus;
+
+const RAW_STDOUT_OUTPUT: &str = "hello\nworld!\n\n";
+const EXP_OUTPUT: &str = "hello\nworld!";
+
+#[cfg(target_family = "windows")]
+fn get_exit_status(raw: u32) -> ExitStatus {
+    use std::os::windows::process::ExitStatusExt;
+    ExitStatus::from_raw(raw)
+}
+
+#[cfg(target_family = "unix")]
+fn get_exit_status(raw: u32) -> ExitStatus {
+    use std::os::unix::process::ExitStatusExt;
+    ExitStatus::from_raw(raw as i32)
+}
 
 #[cfg(test)]
 mod get_command_runner_tests {
@@ -6,7 +22,9 @@ mod get_command_runner_tests {
 
     #[test]
     fn returns_correct_closure() {
-        fn validate(_run_command: fn(&str, Option<&str>) -> Result<String, String>) -> bool {
+        fn validate(
+            _run_command: fn(&str, Option<&str>, bool) -> Result<Option<String>, Option<String>>,
+        ) -> bool {
             true
         };
         let command_runner = get_command_runner();
@@ -18,21 +36,7 @@ mod get_command_runner_tests {
 mod handle_command_output_tests {
     use super::*;
     use std::io::{Error, ErrorKind};
-    use std::process::{ExitStatus, Output};
-    const RAW_STDOUT_OUTPUT: &str = "hello\nworld!\n\n";
-    const EXP_OUTPUT: &str = "hello\nworld!";
-
-    #[cfg(target_family = "windows")]
-    fn get_exit_status(raw: u32) -> ExitStatus {
-        use std::os::windows::process::ExitStatusExt;
-        ExitStatus::from_raw(raw)
-    }
-
-    #[cfg(target_family = "unix")]
-    fn get_exit_status(raw: u32) -> ExitStatus {
-        use std::os::unix::process::ExitStatusExt;
-        ExitStatus::from_raw(raw as i32)
-    }
+    use std::process::Output;
 
     #[test]
     #[should_panic(
@@ -52,7 +56,7 @@ mod handle_command_output_tests {
             stderr: Vec::new(),
         };
         let result = handle_command_output(Ok(output));
-        assert_eq!(&result.unwrap(), EXP_OUTPUT);
+        assert_eq!(result.unwrap(), Some(String::from(EXP_OUTPUT)));
     }
 
     #[test]
@@ -66,7 +70,33 @@ mod handle_command_output_tests {
         let result = handle_command_output(Ok(output));
         assert_eq!(
             result.unwrap_err(),
-            format!("{}\n{}", std_error, RAW_STDOUT_OUTPUT,)
+            Some(format!("{}\n{}", std_error, RAW_STDOUT_OUTPUT))
         );
+    }
+}
+
+#[cfg(test)]
+mod handle_streamed_command_tests {
+    use super::*;
+    use std::io::{Error, ErrorKind};
+
+    #[test]
+    #[should_panic(expected = "Command runner crashed in unrecoverable manner. Details: oops!")]
+    fn should_panic_on_command_error() {
+        let error_details = "oops!";
+        let error = Error::new(ErrorKind::Other, error_details);
+        let _ = handle_streamed_command(Err(error));
+    }
+
+    #[test]
+    fn should_return_ok_on_command_success() {
+        let result = handle_streamed_command(Ok(get_exit_status(0)));
+        assert_eq!(result.unwrap(), None);
+    }
+
+    #[test]
+    fn should_return_err_on_command_failure() {
+        let result = handle_streamed_command(Ok(get_exit_status(3)));
+        assert_eq!(result.unwrap_err(), None);
     }
 }
