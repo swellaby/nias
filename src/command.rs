@@ -49,8 +49,8 @@ fn handle_streamed_command(
     }
 }
 
-pub fn get_command_runner()
--> fn(cmd: &str, dir: Option<&str>, stream_io: bool) -> Result<Option<String>, Option<String>> {
+pub fn get_command_runner(
+) -> fn(cmd: &str, dir: Option<&str>, stream_io: bool) -> Result<Option<String>, Option<String>> {
     |cmd: &str, dir: Option<&str>, stream_io: bool| {
         let target_dir = match dir {
             Some(d) => d,
