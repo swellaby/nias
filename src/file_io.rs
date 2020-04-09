@@ -34,8 +34,8 @@ fn create_file(path: PathBuf, _make_executable: bool) -> Result<File, ()> {
     }
 }
 
-pub fn get_file_writer(
-) -> fn(file_path: &str, contents: &str, make_executable: bool) -> Result<(), String> {
+pub fn get_file_writer()
+-> fn(file_path: &str, contents: &str, make_executable: bool) -> Result<(), String> {
     |file_path: &str, contents: &str, make_executable: bool| {
         let path = PathBuf::from(file_path);
         let mut file = match create_file(path, make_executable) {
