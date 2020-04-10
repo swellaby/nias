@@ -1,5 +1,5 @@
 use std::io::Result as IOResult;
-use std::process::{Command, Output};
+use std::process::{Command, ExitStatus, Output};
 
 #[cfg(target_family = "unix")]
 const PROGRAM: &str = "sh";
@@ -11,7 +11,7 @@ const PROGRAM: &str = "cmd";
 #[cfg(target_family = "windows")]
 const SWITCH: &str = "/C";
 
-fn handle_command_output(output: IOResult<Output>) -> Result<String, String> {
+fn handle_command_output(output: IOResult<Output>) -> Result<Option<String>, Option<String>> {
     match output {
         Err(details) => panic!(
             "Command runner crashed in unrecoverable manner. Details: {}",
@@ -19,34 +19,59 @@ fn handle_command_output(output: IOResult<Output>) -> Result<String, String> {
         ),
         Ok(output) => {
             if output.status.success() {
-                Ok(String::from_utf8(output.stdout)
-                    .unwrap()
-                    .trim_end_matches('\n')
-                    .to_string())
+                Ok(Some(
+                    String::from_utf8(output.stdout)
+                        .unwrap()
+                        .trim_end_matches('\n')
+                        .to_string(),
+                ))
             } else {
-                Err(format!(
+                Err(Some(format!(
                     "{}\n{}",
                     String::from_utf8(output.stderr).unwrap(),
                     String::from_utf8(output.stdout).unwrap(),
-                ))
+                )))
             }
         }
     }
 }
 
-pub fn get_command_runner() -> fn(cmd: &str, dir: Option<&str>) -> Result<String, String> {
-    |cmd: &str, dir: Option<&str>| {
+fn handle_streamed_command(
+    exit_status: IOResult<ExitStatus>,
+) -> Result<Option<String>, Option<String>> {
+    match exit_status {
+        Err(details) => panic!(
+            "Command runner crashed in unrecoverable manner. Details: {}",
+            details
+        ),
+        Ok(status) if status.success() => Ok(None),
+        Ok(_) => Err(None),
+    }
+}
+
+pub fn get_command_runner(
+) -> fn(cmd: &str, dir: Option<&str>, stream_io: bool) -> Result<Option<String>, Option<String>> {
+    |cmd: &str, dir: Option<&str>, stream_io: bool| {
         let target_dir = match dir {
             Some(d) => d,
             None => ".",
         };
 
-        handle_command_output(
-            Command::new(PROGRAM)
-                .current_dir(target_dir)
-                .args(&[SWITCH, cmd])
-                .output(),
-        )
+        if stream_io {
+            handle_streamed_command(
+                Command::new(PROGRAM)
+                    .current_dir(target_dir)
+                    .args(&[SWITCH, cmd])
+                    .status(),
+            )
+        } else {
+            handle_command_output(
+                Command::new(PROGRAM)
+                    .current_dir(target_dir)
+                    .args(&[SWITCH, cmd])
+                    .output(),
+            )
+        }
     }
 }
 
