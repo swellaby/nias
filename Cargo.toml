@@ -29,7 +29,7 @@ exclude = [
 [dependencies]
 
 [dev-dependencies]
-rusty-hook = "0.10.0"
+rusty-hook = "0.11.0"
 
 [badges]
 maintenance = { status = "actively-developed" }
