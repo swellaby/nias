@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::io::Result as IOResult;
 use std::process::{Command, ExitStatus, Output};
 
@@ -49,28 +50,25 @@ fn handle_streamed_command(
     }
 }
 
-pub fn get_command_runner(
-) -> fn(cmd: &str, dir: Option<&str>, stream_io: bool) -> Result<Option<String>, Option<String>> {
-    |cmd: &str, dir: Option<&str>, stream_io: bool| {
-        let target_dir = match dir {
-            Some(d) => d,
-            None => ".",
-        };
+#[allow(clippy::type_complexity)]
+pub fn get_command_runner() -> fn(
+    cmd: &str,
+    dir: Option<&str>,
+    stream_io: bool,
+    env_vars: Option<HashMap<String, String>>,
+) -> Result<Option<String>, Option<String>> {
+    |cmd: &str, dir: Option<&str>, stream_io: bool, env_vars: Option<HashMap<String, String>>| {
+        let mut command = Command::new(PROGRAM);
+        command.current_dir(dir.unwrap_or(".")).args(&[SWITCH, cmd]);
+
+        if let Some(ev) = env_vars {
+            command.envs(&ev);
+        }
 
         if stream_io {
-            handle_streamed_command(
-                Command::new(PROGRAM)
-                    .current_dir(target_dir)
-                    .args(&[SWITCH, cmd])
-                    .status(),
-            )
+            handle_streamed_command(command.status())
         } else {
-            handle_command_output(
-                Command::new(PROGRAM)
-                    .current_dir(target_dir)
-                    .args(&[SWITCH, cmd])
-                    .output(),
-            )
+            handle_command_output(command.output())
         }
     }
 }
