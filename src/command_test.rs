@@ -19,11 +19,17 @@ fn get_exit_status(raw: u32) -> ExitStatus {
 #[cfg(test)]
 mod get_command_runner_tests {
     use super::get_command_runner;
+    use std::collections::HashMap;
 
     #[test]
     fn returns_correct_closure() {
         fn validate(
-            _run_command: fn(&str, Option<&str>, bool) -> Result<Option<String>, Option<String>>,
+            _run_command: fn(
+                &str,
+                Option<&str>,
+                bool,
+                Option<HashMap<String, String>>,
+            ) -> Result<Option<String>, Option<String>>,
         ) -> bool {
             true
         };
