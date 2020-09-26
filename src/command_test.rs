@@ -28,7 +28,7 @@ mod get_command_runner_tests {
                 &str,
                 Option<&str>,
                 bool,
-                Option<HashMap<String, String>>,
+                Option<&HashMap<String, String>>,
             ) -> Result<Option<String>, Option<String>>,
         ) -> bool {
             true

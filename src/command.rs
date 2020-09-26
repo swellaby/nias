@@ -55,14 +55,14 @@ pub fn get_command_runner() -> fn(
     cmd: &str,
     dir: Option<&str>,
     stream_io: bool,
-    env_vars: Option<HashMap<String, String>>,
+    env_vars: Option<&HashMap<String, String>>,
 ) -> Result<Option<String>, Option<String>> {
-    |cmd: &str, dir: Option<&str>, stream_io: bool, env_vars: Option<HashMap<String, String>>| {
+    |cmd: &str, dir: Option<&str>, stream_io: bool, env_vars: Option<&HashMap<String, String>>| {
         let mut command = Command::new(PROGRAM);
         command.current_dir(dir.unwrap_or(".")).args(&[SWITCH, cmd]);
 
         if let Some(ev) = env_vars {
-            command.envs(&ev);
+            command.envs(ev);
         }
 
         if stream_io {
